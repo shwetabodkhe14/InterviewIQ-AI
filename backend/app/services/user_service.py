@@ -1,3 +1,8 @@
+from app.core.security import create_access_token
+from app.security.password import (
+    hash_password,
+    verify_password
+)
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -26,3 +31,24 @@ class UserService:
         )
 
         return UserRepository.create_user(db, new_user)
+    @staticmethod
+    def login_user(db: Session, email: str, password: str):
+
+        user = UserRepository.get_user_by_email(db, email)
+
+        if not user:
+            raise ValueError("Invalid email or password.")
+
+        if not verify_password(password, user.hashed_password):
+            raise ValueError("Invalid email or password.")
+
+        access_token = create_access_token(
+            {
+                "sub": user.email
+            }
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }    
