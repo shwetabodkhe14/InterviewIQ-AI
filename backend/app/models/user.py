@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
@@ -46,3 +46,13 @@ class User(Base):
         DateTime,
         default=datetime.utcnow
     )
+
+    resumes = relationship(
+        "Resume",
+        back_populates="user"
+    )
+    interview_results = relationship(
+    "InterviewResult",
+    back_populates="user",
+    cascade="all, delete-orphan"
+)
