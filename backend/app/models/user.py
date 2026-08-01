@@ -55,4 +55,10 @@ class User(Base):
     "InterviewResult",
     back_populates="user",
     cascade="all, delete-orphan"
-)
+    )
+    
+    sessions = relationship(
+    "InterviewSession",
+    back_populates="user",
+    cascade="all, delete-orphan"
+    )

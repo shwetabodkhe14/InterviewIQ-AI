@@ -1,5 +1,6 @@
 import json
 
+from google.genai import types
 from app.ai.gemini_client import client
 
 
@@ -12,8 +13,6 @@ class GeminiParser:
 You are an expert ATS Resume Parser.
 
 Extract the resume into the following JSON.
-
-Return ONLY valid JSON.
 
 {{
     "name":"",
@@ -37,7 +36,10 @@ Resume:
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=prompt
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
         )
 
         response_text = response.text.strip()
