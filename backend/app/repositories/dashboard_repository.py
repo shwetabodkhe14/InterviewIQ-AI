@@ -2,6 +2,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.interview_result import InterviewResult
+from app.models.interview_session import InterviewSession
+from app.models.resume import Resume
 
 
 class DashboardRepository:
@@ -10,13 +12,30 @@ class DashboardRepository:
     def get_dashboard(db: Session, user_id: int):
 
         total = (
-            db.query(InterviewResult)
-            .filter(InterviewResult.user_id == user_id)
+            db.query(InterviewSession)
+            .filter(InterviewSession.user_id == user_id)
             .count()
         )
 
+        has_resume = (
+            db.query(Resume)
+            .filter(Resume.user_id == user_id)
+            .first()
+        ) is not None
+
         if total == 0:
-            return None
+            return {
+                "total_interviews": 0,
+                "average_score": None,
+                "highest_score": 0,
+                "latest_score": 0,
+                "technical_average": 0,
+                "communication_average": 0,
+                "confidence_average": 0,
+                "grammar_average": 0,
+                "recent_scores": [],
+                "has_resume": has_resume
+            }
 
         average_score = (
             db.query(func.avg(InterviewResult.overall_score))
@@ -71,12 +90,13 @@ class DashboardRepository:
 
         return {
             "total_interviews": total,
-            "average_score": round(average_score, 2),
+            "average_score": round(average_score or 0, 2),
             "highest_score": highest_score,
             "latest_score": latest_score[0] if latest_score else 0,
-            "technical_average": round(technical_avg, 2),
-            "communication_average": round(communication_avg, 2),
-            "confidence_average": round(confidence_avg, 2),
-            "grammar_average": round(grammar_avg, 2),
-            "recent_scores": [score[0] for score in recent_scores]
+            "technical_average": round(technical_avg or 0, 2),
+            "communication_average": round(communication_avg or 0, 2),
+            "confidence_average": round(confidence_avg or 0, 2),
+            "grammar_average": round(grammar_avg or 0, 2),
+            "recent_scores": [score[0] for score in recent_scores],
+            "has_resume": has_resume
         }

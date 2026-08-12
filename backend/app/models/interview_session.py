@@ -11,8 +11,7 @@ class InterviewSession(Base):
     __tablename__ = "interview_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-
-    total_questions = Column(Integer, default=20)
+    total_questions = Column(Integer, default=6)
 
     completed_questions = Column(Integer, default=0)
 

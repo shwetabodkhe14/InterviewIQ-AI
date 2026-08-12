@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 
 from app.models.interview_result import InterviewResult
 
-
 class InterviewResultRepository:
 
     @staticmethod
@@ -11,11 +10,13 @@ class InterviewResultRepository:
         user_id: int,
         question: str,
         answer: str,
-        evaluation: dict
+        evaluation: dict,
+        session_id: int = None
     ):
 
         result = InterviewResult(
             user_id=user_id,
+            session_id=session_id,
             question=question,
             answer=answer,
             technical_score=evaluation["technical_score"],

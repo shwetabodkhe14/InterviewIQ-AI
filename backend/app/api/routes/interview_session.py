@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.session_answer import SessionAnswerRequest
+from app.schemas.session_answer import SessionAnswerRequest, InterviewStartRequest
 from app.ai.answer_evaluator import AnswerEvaluator
 from app.ai.gemini_parser import GeminiParser
 from app.ai.interview_generator import InterviewGenerator
@@ -23,6 +23,7 @@ router = APIRouter(
 
 @router.post("/start")
 def start_interview(
+    request: InterviewStartRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -51,7 +52,10 @@ def start_interview(
 
     # Generate interview questions
     questions_dict = InterviewGenerator.generate_questions(
-        resume_data
+        resume_data,
+        company=request.company,
+        difficulty=request.difficulty,
+        domain=request.domain
     )
 
     questions = []
@@ -118,17 +122,30 @@ def answer_question(
 
     question = session.questions[current_index]
 
-    result = AnswerEvaluator.evaluate(
-        question=question,
-        answer=request.answer
-    )
+    from google.genai.errors import ClientError
+    try:
+        result = AnswerEvaluator.evaluate(
+            question=question,
+            answer=request.answer
+        )
+    except ClientError as e:
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+            raise HTTPException(
+                status_code=429,
+                detail="AI service rate limit exceeded. Please wait about 30-60 seconds before trying again."
+            )
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while evaluating your answer with the AI."
+        )
 
     InterviewResultRepository.create(
         db=db,
         user_id=current_user.id,
         question=question,
         answer=request.answer,
-        evaluation=result
+        evaluation=result,
+        session_id=session.id
     )
 
     InterviewSessionRepository.update_progress(

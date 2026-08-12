@@ -32,7 +32,17 @@ class InterviewResult(Base):
         nullable=False
     )
 
+    session_id = Column(
+        Integer,
+        ForeignKey("interview_sessions.id"),
+        nullable=True
+    )
+
     user = relationship(
         "User",
         back_populates="interview_results"
+    )
+
+    session = relationship(
+        "InterviewSession"
     )

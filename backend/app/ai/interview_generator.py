@@ -41,23 +41,28 @@ class InterviewGenerator:
         if not required_keys.issubset(data.keys()):
             return False
             
-        if not isinstance(data.get("hr"), list) or len(data["hr"]) != 5:
+        if not isinstance(data.get("hr"), list) or len(data["hr"]) != 2:
             return False
             
-        if not isinstance(data.get("technical"), list) or len(data["technical"]) != 10:
+        if not isinstance(data.get("technical"), list) or len(data["technical"]) != 2:
             return False
             
-        if not isinstance(data.get("projects"), list) or len(data["projects"]) != 5:
+        if not isinstance(data.get("projects"), list) or len(data["projects"]) != 2:
             return False
             
         return True
 
     @staticmethod
-    def generate_questions(resume_data: dict) -> Dict[str, List[str]]:
+    def generate_questions(resume_data: dict, company: str = None, difficulty: str = None, domain: str = None) -> Dict[str, List[str]]:
         prompt = f"""
 You are an expert Technical Interviewer.
 
 Below is a candidate's parsed resume in JSON format.
+
+Context:
+- Target Company: {company or "Generic"}
+- Difficulty Level: {difficulty or "Medium"}
+- Target Domain: {domain or "General"}
 
 {json.dumps(resume_data, indent=2)}
 
@@ -68,9 +73,9 @@ Rules:
 - Do NOT include markdown.
 - Do NOT include explanations.
 - Do NOT wrap inside ```.
-- You must generate EXACTLY 5 HR questions.
-- You must generate EXACTLY 10 Technical questions.
-- You must generate EXACTLY 5 Projects questions.
+- You must generate EXACTLY 2 HR questions.
+- You must generate EXACTLY 2 Technical questions.
+- You must generate EXACTLY 2 Projects questions.
 - Ensure all quotes inside strings are properly escaped.
 - Ensure no trailing commas in arrays.
 
@@ -78,27 +83,13 @@ Return exactly in this format:
 {{
   "hr": [
     "...",
-    "...",
-    "...",
-    "...",
     "..."
   ],
   "technical": [
     "...",
-    "...",
-    "...",
-    "...",
-    "...",
-    "...",
-    "...",
-    "...",
-    "...",
     "..."
   ],
   "projects": [
-    "...",
-    "...",
-    "...",
     "...",
     "..."
   ]

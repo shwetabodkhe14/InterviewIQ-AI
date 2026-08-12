@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.interview_result import InterviewResult
-
+from app.models.interview_session import InterviewSession
 
 class HistoryRepository:
 
@@ -9,9 +8,9 @@ class HistoryRepository:
     def get_all(db: Session, user_id: int):
 
         results = (
-            db.query(InterviewResult)
-            .filter(InterviewResult.user_id == user_id)
-            .order_by(InterviewResult.created_at.desc())
+            db.query(InterviewSession)
+            .filter(InterviewSession.user_id == user_id)
+            .order_by(InterviewSession.created_at.desc())
             .all()
         )
 
@@ -20,15 +19,9 @@ class HistoryRepository:
         for item in results:
             history.append({
                 "id": item.id,
-                "question": item.question,
                 "overall_score": item.overall_score,
-                "technical_score": item.technical_score,
-                "communication_score": item.communication_score,
-                "confidence_score": item.confidence_score,
-                "grammar_score": item.grammar_score,
-                "feedback": item.feedback,
-                "strengths": item.strengths,
-                "weaknesses": item.weaknesses,
+                "completed_questions": item.completed_questions,
+                "total_questions": item.total_questions,
                 "created_at": item.created_at
             })
 
